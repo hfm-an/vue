@@ -19,7 +19,10 @@ export function initRender (vm: Component) {
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null // v-once cached trees
   const options = vm.$options
+
+  // 用来做最后的替换的那个父节点
   const parentVnode = vm.$vnode = options._parentVnode // the placeholder node in parent tree
+  // 父节点里所包含的内容，就是父节点的 context 属性
   const renderContext = parentVnode && parentVnode.context
   vm.$slots = resolveSlots(options._renderChildren, renderContext)
   vm.$scopedSlots = emptyObject
@@ -27,6 +30,7 @@ export function initRender (vm: Component) {
   // so that we get proper render context inside it.
   // args order: tag, data, children, normalizationType, alwaysNormalize
   // internal version is used by render functions compiled from templates
+  // vm._c 上存有 createElement 方法的调用
   vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
   // normalization is always applied for the public version, used in
   // user-written render functions.

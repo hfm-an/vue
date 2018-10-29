@@ -55,6 +55,7 @@ export function initState (vm: Component) {
   } else {
     observe(vm._data = {}, true /* asRootData */)
   }
+  // TODO 看到了这里
   if (opts.computed) initComputed(vm, opts.computed)
   if (opts.watch && opts.watch !== nativeWatch) {
     initWatch(vm, opts.watch)
@@ -66,13 +67,16 @@ function initProps (vm: Component, propsOptions: Object) {
   const props = vm._props = {}
   // cache prop keys so that future props updates can iterate using Array
   // instead of dynamic object key enumeration.
+  // prop 名字的缓存 map
   const keys = vm.$options._propKeys = []
   const isRoot = !vm.$parent
   // root instance props should be converted
   if (!isRoot) {
     toggleObserving(false)
   }
+  // 把组件的 props 全部都遍历一遍
   for (const key in propsOptions) {
+    // 先缓存一道
     keys.push(key)
     const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
@@ -97,6 +101,7 @@ function initProps (vm: Component, propsOptions: Object) {
         }
       })
     } else {
+      // props 也全部都监听，执行数据的双向绑定
       defineReactive(props, key, value)
     }
     // static props are already proxied on the component's prototype
@@ -114,6 +119,7 @@ function initData (vm: Component) {
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
+    // data 需要一个 function
   if (!isPlainObject(data)) {
     data = {}
     process.env.NODE_ENV !== 'production' && warn(
@@ -123,6 +129,7 @@ function initData (vm: Component) {
     )
   }
   // proxy data on instance
+  // 取出来所有的 keys
   const keys = Object.keys(data)
   const props = vm.$options.props
   const methods = vm.$options.methods
@@ -130,6 +137,7 @@ function initData (vm: Component) {
   while (i--) {
     const key = keys[i]
     if (process.env.NODE_ENV !== 'production') {
+      // 校验 data 的名字与 methods 的是否重名
       if (methods && hasOwn(methods, key)) {
         warn(
           `Method "${key}" has already been defined as a data property.`,
@@ -137,6 +145,7 @@ function initData (vm: Component) {
         )
       }
     }
+    // 校验 data 的名字与 props 的是否重名
     if (props && hasOwn(props, key)) {
       process.env.NODE_ENV !== 'production' && warn(
         `The data property "${key}" is already declared as a prop. ` +
@@ -279,6 +288,9 @@ function initMethods (vm: Component, methods: Object) {
         )
       }
     }
+    // 将 methods[key] 挂载到实例上
+    // 并且将上下文绑定成当前的 vm 实例
+    // 所以我们 methods : { again (){} }, 可以直接 this.again() 来调用
     vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
   }
 }

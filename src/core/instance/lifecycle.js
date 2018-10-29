@@ -39,6 +39,8 @@ export function initLifecycle (vm: Component) {
   vm.$children = []
   vm.$refs = {}
 
+  // 初始化各个生命周期钩子的 flag
+  // 类似 _isMounted, isDestroyed 等等
   vm._watcher = null
   vm._inactive = null
   vm._directInactive = false

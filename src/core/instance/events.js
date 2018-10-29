@@ -10,6 +10,8 @@ import {
 import { updateListeners } from '../vdom/helpers/index'
 
 export function initEvents (vm: Component) {
+  // 初始化 _events, 所有组件上的 events 其实都是一个对象
+  // 都是这个 _events 的子属性
   vm._events = Object.create(null)
   vm._hasHookEvent = false
   // init parent attached events

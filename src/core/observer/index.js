@@ -41,8 +41,10 @@ export class Observer {
 
   constructor (value: any) {
     this.value = value
+    // 为这个 value 注册一个 Dep
     this.dep = new Dep()
     this.vmCount = 0
+    // 这里其实就表示着这个 value 已经被监听了
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
       if (hasProto) {
@@ -52,6 +54,7 @@ export class Observer {
       }
       this.observeArray(value)
     } else {
+      // defineReactive 这个对象
       this.walk(value)
     }
   }
@@ -64,6 +67,7 @@ export class Observer {
   walk (obj: Object) {
     const keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
+      // 执行监听
       defineReactive(obj, keys[i])
     }
   }
@@ -139,27 +143,35 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  // 这个 obj 对象的 key 属性对应的唯一一个 Dep
   const dep = new Dep()
 
+  // 忽略掉 configurable 为 false 的属性
+  // 因为它们已经不可改了
   const property = Object.getOwnPropertyDescriptor(obj, key)
   if (property && property.configurable === false) {
     return
   }
 
   // cater for pre-defined getter/setters
+  // 为了兼容 initData 时候过来的，defineReactive(values, key)
   const getter = property && property.get
   const setter = property && property.set
   if ((!getter || setter) && arguments.length === 2) {
     val = obj[key]
   }
 
+  // 如果 val 还是一个对象的话，则去递归为 val 继续双向绑定
   let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
+      // 获取 value
       const value = getter ? getter.call(obj) : val
+      // 如果当前 Dep 存在 target，则说明当前属性的唯一 dep 被 Dep.target 对应的 watcher 订阅了
       if (Dep.target) {
+        // 执行订阅的过程
         dep.depend()
         if (childOb) {
           childOb.dep.depend()
@@ -173,6 +185,7 @@ export function defineReactive (
     set: function reactiveSetter (newVal) {
       const value = getter ? getter.call(obj) : val
       /* eslint-disable no-self-compare */
+      // 如果 newValue 和以前的 value 相同，则什么都不做
       if (newVal === value || (newVal !== newVal && value !== value)) {
         return
       }
@@ -187,7 +200,9 @@ export function defineReactive (
       } else {
         val = newVal
       }
+      // 继续监听新的值
       childOb = !shallow && observe(newVal)
+      // 通知订阅了这个 dep 的 watcher 去触发视图的更新
       dep.notify()
     }
   })

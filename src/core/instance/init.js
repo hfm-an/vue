@@ -52,6 +52,8 @@ export function initMixin (Vue: Class<Component>) {
     initLifecycle(vm)
     initEvents(vm)
     initRender(vm)
+    // 触发生命周期钩子
+    // 这里是 beforeCreate 生命周期钩子
     callHook(vm, 'beforeCreate')
     initInjections(vm) // resolve injections before data/props
     initState(vm)
